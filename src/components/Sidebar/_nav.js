@@ -15,6 +15,11 @@ export default {
       url: '/rooms',
       icon: 'icon-home'
     },
+    {
+      name: 'Events',
+      url: '/events',
+      icon: 'icon-home'
+    },
      {
       name: 'Attendance',
       url: '/attendance',

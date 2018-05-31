@@ -22,6 +22,7 @@ ReactDOM.render((
     <Switch>
       <Route path="/dashboard" name="Home" component={Full} />
       <Route path="/rooms" name="Home" component={Full} />
+      <Route path="/events" name="Home" component={Full} />
       <Route path="/session" name="Home" component={Full} />
       <Route path="/attendance" name="Home" component={Full} />
       <Route path="/attendee" name="Home" component={Full} />

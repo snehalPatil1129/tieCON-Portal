@@ -13,6 +13,7 @@ import Role from '../../views/Users/Role/';
 import Reports from '../../views/Reports/Reports';
 import Attendance from '../../views/Attendance/Attendance';
 import Session from '../../views/Sessions/Session';
+import Events from '../../views/Events/Events';
 import Registration from '../../views/Registration/Registration';
 import Rooms from '../../views/Rooms/Rooms';
 import RegistrationList from '../../views/RegistrationList/registrationList';
@@ -71,6 +72,7 @@ class Full extends Component {
                     <Route path="/dashboard" name="Dashboard" component={Dashboard} />
                     <Route path="/user" name="User" component={User} />
                     <Route path="/role" name="Role" component={Role} />
+                    <Route path="/events" name="Events" component={Events} />
                     <Route path='/registration' name='Registration' component={Registration} />
                     <Route path='/attendance' name='Attendance' component={Attendance} />
                     <Route path='/session' name='Session' component={Session} />
