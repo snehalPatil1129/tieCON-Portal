@@ -36,53 +36,54 @@ class SessionReport extends React.Component {
     componentWillMount() {
         let componentRef = this;
         let attendance = [], eventList = [], eventsID = [], attendee = [];
-        DBUtil.getDocRef("Sessions")
-            .get().then((snapshot) => {
-                snapshot.forEach(function (doc) {
-                    eventList.push({
-                        label: doc.data().eventName,
-                        value: doc.id
-                    });
-                });
+     
+        let sessionList = localStorage.getItem('sessionList');
+        var sessions = JSON.parse(sessionList);
 
+        for (var key in sessions) {
+            eventList.push({
+                label: sessions[key]['sessionInfo']['eventName'],
+                value: sessions[key]['id']
             });
-        DBUtil.getDocRef("Attendee")
-            .get().then((snapshot) => {
-                snapshot.forEach(function (doc) {
-                    let data = doc.data();
-                    attendee.push({
-                        fullName: data.fullName,
-                        userRole: data.roleName,
-                        userId: doc.id,
-                    });
-                });
+        }
+     
+         this.setState({ eventDropDown: eventList });
 
-                DBUtil.getDocRef("Attendance")
-                    .onSnapshot((snapshot) => {
-                        snapshot.forEach(function (doc) {
-                            let data = doc.data();
-                            if (!data.userName || data.userName.trim()=="") {
-                                let user = _.filter(attendee, { userId: data.userId })[0];
-                                data.userName = user?user.fullName:data.userName;
-                                data.userRole = user?user.userRole:data.userRole;
-                            }
-                            attendance.push({
-                                fullName: data.userName,
-                                profiles: data.userRole,
-                                userId: data.userId,
-                                session: data.sessionId,
-                                entry: data.timestamp,
-                            });
-                        });
+        // DBUtil.getDocRef("Attendee")
+        //     .get().then((snapshot) => {
+        //         snapshot.forEach(function (doc) {
+        //             let data = doc.data();
+        //             attendee.push({
+        //                 fullName: data.fullName,
+        //                 userRole: data.roleName,
+        //                 userId: doc.id,
+        //             });
+        //         });
 
-                        attendance = _.orderBy(attendance, ['userId', 'entry'], ['asc', 'desc']);
-                        attendance = _.uniqBy(attendance, 'userId');
-                        componentRef.setState({ eventDropDown: eventList, attendance });
-                        this.refresh();
-                    })
-            });
+        //         DBUtil.getDocRef("Attendance")
+        //             .onSnapshot((snapshot) => {
+        //                 snapshot.forEach(function (doc) {
+        //                     let data = doc.data();
+        //                     if (!data.userName || data.userName.trim() == "") {
+        //                         let user = _.filter(attendee, { userId: data.userId })[0];
+        //                         data.userName = user ? user.fullName : data.userName;
+        //                         data.userRole = user ? user.userRole : data.userRole;
+        //                     }
+        //                     attendance.push({
+        //                         fullName: data.userName,
+        //                         profiles: data.userRole,
+        //                         userId: data.userId,
+        //                         session: data.sessionId,
+        //                         entry: data.timestamp,
+        //                     });
+        //                 });
 
-
+        //                 attendance = _.orderBy(attendance, ['userId', 'entry'], ['asc', 'desc']);
+        //                 attendance = _.uniqBy(attendance, 'userId');
+        //                 componentRef.setState({ eventDropDown: eventList, attendance });
+        //                 this.refresh();
+        //             })
+        //     });
     }
     refresh() {
         this.handleSelectChange(this.state.value);
