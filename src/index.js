@@ -26,6 +26,7 @@ ReactDOM.render((
       <Route path="/session" name="Home" component={Full} />
       <Route path="/attendance" name="Home" component={Full} />
       <Route path="/attendee" name="Home" component={Full} />
+       <Route path="/speakers" name="Home" component={Full} />
       <Route path="/questions" name="Home" component={Full} />
       <Route path="/registration" name="Home" component={Full} />
       <Route path="/registrationList" name="Home" component={Full} />
