@@ -12,28 +12,90 @@ import * as firebase from 'firebase';
 import 'firebase/firestore';
 import { DBUtil } from '../../services';
 import { ToastContainer, toast } from 'react-toastify';
-import Avatar from 'react-avatar';
-//import QRCode from 'qrcode'
-//const data = require('../../../public/attendeeData/attendeeData.json');
 
 class Events extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            startDate : moment(),
-            endDate : moment()
+            eventDetails: {
+                eventName: "",
+                location: "",
+                venue: "",
+                startDate: moment(),
+                endDate: moment()
+            },
+            submitted : false,
+            inValidDates : false
         };
         this.changeFunction = this.changeFunction.bind(this);
-        this.changeEndFunction = this.changeEndFunction.bind(this);
+        this.onChangeHandler = this.onChangeHandler.bind(this);
+        this.onSubmitHandler = this.onSubmitHandler.bind(this);
+        this.resetField = this.resetField.bind(this);
+
     }
-    changeFunction ( date) {
+    changeFunction(date, type) {
+        let eventDetails = {
+            ...this.state.eventDetails
+        }
+        eventDetails[type] = date;
         this.setState({
-            startDate : date
+            eventDetails: eventDetails,
+            inValidDates : false
+        })
+    }
+    onChangeHandler(event) {
+        let eventDetailArray = {
+            ...this.state.eventDetails
+        };
+        eventDetailArray[event.target.name] = event.target.value;
+        this.setState({
+            eventDetails: eventDetailArray
+        })
+    }
+    onSubmitHandler () {
+        let eventDetails = {
+            ...this.state.eventDetails
+        }
+        this.setState({
+            submitted : true
         });
+        let valiDate = moment(eventDetails["startDate"]).isBefore(eventDetails["endDate"]);
+        let validSameDate = moment(eventDetails["startDate"]).isSame(eventDetails["endDate"]);
+        if(!valiDate || validSameDate ){
+            this.setState({
+                inValidDates :  true
+            });
+        }
+
+        if(eventDetails.eventName && valiDate && !validSameDate && eventDetails.location){
+
+            DBUtil.getDocRef("Events").add({
+                eventName : eventDetails.eventName,
+                location : eventDetails.location,
+                venue: eventDetails.venue,
+                startDate : new Date (eventDetails.startDate),
+                endDate : new Date (eventDetails.endDate),
+            })
+            .then((res) => {
+                this.setState({
+                    submitted : false
+                })
+                this.resetField();
+            })
+            .catch((error) => {
+            });
+        }
     }
-    changeEndFunction (date) {
+    resetField () {
+        let eventDetails = {
+            eventName: "",
+            location: "",
+            venue: "",
+            startDate: moment(),
+            endDate: moment()
+        }
         this.setState({
-            endDate : date
+            eventDetails : eventDetails
         });
     }
 
@@ -46,6 +108,27 @@ class Events extends Component {
                             <CardBody className="p-4">
                                 <h1>Events</h1>
                                 <FormGroup row>
+                                    <Col xs="12" >
+                                        <InputGroup className="mb-3">
+                                            <InputGroupAddon addonType="prepend">
+                                                <InputGroupText>
+                                                    <i className="icon-user"></i>
+                                                </InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input
+                                                type="text"
+                                                placeholder="Event Name"
+                                                name="eventName"
+                                                value={this.state.eventDetails.eventName}
+                                                onChange={this.onChangeHandler} />
+
+                                                {this.state.submitted && !this.state.eventDetails.eventName &&
+                                                        <div className="help-block" style={{ color: "red" }}>*Required</div>
+                                                }
+                                        </InputGroup>
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
                                     <Col xs="12" md="6" >
                                         <InputGroup className="mb-3">
                                             <InputGroupAddon addonType="prepend">
@@ -53,25 +136,54 @@ class Events extends Component {
                                                     <i className="icon-user"></i>
                                                 </InputGroupText>
                                             </InputGroupAddon>
-                                            <Input type="text" placeholder="Event Name" name="eventName" />
+                                            <DatePicker
+                                                id="start"
+                                                selected={this.state.eventDetails.startDate}
+                                                onChange={(event) => this.changeFunction(event, "startDate")}
+                                                placeholderText="Select start date"
+                                            />
+                                            {this.state.submitted && this.state.inValidDates &&
+                                                        <div className="help-block" style={{ color: "red" }}>*Invalid date</div>
+                                                }
                                         </InputGroup>
                                     </Col>
-                                    </FormGroup>
-                                    <FormGroup row>
-                                    <Col xs="12" md="6" >
-                                    <InputGroup className="mb-3">
+                                    <Col md="6" >
+                                        <InputGroup className="mb-6">
                                             <InputGroupAddon addonType="prepend">
                                                 <InputGroupText>
                                                     <i className="icon-user"></i>
                                                 </InputGroupText>
                                             </InputGroupAddon>
-                                            <DatePicker 
-                                                id="start" 
-                                                selected={this.state.startDate}
-                                                onChange={this.changeFunction}
-                                                //highlightDates={[moment().subtract(7, "days"), moment().add(7, "days")]}
-                                                placeholderText="Select start date"
-                                                 />
+                                            <DatePicker
+                                                selected={this.state.eventDetails.endDate}
+                                                onChange={(event) => this.changeFunction(event, "endDate")}
+                                                placeholderText="Select End date"
+                                            />
+
+                                            {this.state.submitted && this.state.inValidDates &&
+                                                        <div className="help-block" style={{ color: "red" }}>*Invalid date</div>
+                                                }
+                                        </InputGroup>
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col xs="12" md="6" >
+                                        <InputGroup className="mb-3">
+                                            <InputGroupAddon addonType="prepend">
+                                                <InputGroupText>
+                                                    <i className="icon-user"></i>
+                                                </InputGroupText>
+                                            </InputGroupAddon>
+                                            <Input
+                                                type="text"
+                                                placeholder="Location"
+                                                name="location"
+                                                value={this.state.eventDetails.location}
+                                                onChange={this.onChangeHandler} />
+
+                                                {this.state.submitted && !this.state.eventDetails.location &&
+                                                        <div className="help-block" style={{ color: "red" }}>*Required</div>
+                                                }
                                         </InputGroup>
                                     </Col>
                                     <Col md="6" >
@@ -81,14 +193,26 @@ class Events extends Component {
                                                     <i className="icon-user"></i>
                                                 </InputGroupText>
                                             </InputGroupAddon>
-                                            <DatePicker
-                                                id="end" 
-                                                selected={this.state.endDate}
-                                                onChange={this.changeEndFunction}
-                                                //highlightDates={[moment().subtract(7, "days"), moment().add(7, "days")]}
-                                                placeholderText="Select End date"
-                                                 />
+                                            <Input
+                                                type="text"
+                                                placeholder="Venue"
+                                                name="venue"
+                                                value={this.state.eventDetails.venue}
+                                                onChange={this.onChangeHandler} />
+                                                
+                                                {this.state.submitted && !this.state.eventDetails.venue &&
+                                                        <div className="help-block" style={{ color: "red" }}>*Required</div>
+                                                }
                                         </InputGroup>
+                                    </Col>
+                                </FormGroup>
+                                <FormGroup row>
+                                    <Col xs="8" md="3">
+                                        <Button onClick={this.onSubmitHandler} type="submit" size="md" color="success" > Submit</Button>
+                                        </Col>
+                                        <Col md="3">
+                                        <Button onClick={this.resetField} type="reset" size="md" color="danger" > Reset</Button>
+                                        <ToastContainer autoClose={2000} />
                                     </Col>
                                 </FormGroup>
                             </CardBody>
@@ -98,8 +222,6 @@ class Events extends Component {
             </div>
         );
     }
-
-
 }
 export default Events;
 

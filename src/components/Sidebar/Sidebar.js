@@ -12,12 +12,25 @@ class Sidebar extends Component {
 
   constructor(props) {
     super(props);
-
+    const roles = localStorage.getItem('roles').split(',');
+    this.state = {
+        isAdmin : false,
+        roles : roles
+    };
     this.handleClick = this.handleClick.bind(this);
     this.activeRoute = this.activeRoute.bind(this);
     this.hideMobile = this.hideMobile.bind(this);
   }
 
+  componentWillMount () {
+      this.state.roles.forEach(role => {
+        if(role === 'Admin'){
+          this.setState({
+            isAdmin : true
+          });
+        }
+      })
+  }
 
   handleClick(e) {
     e.preventDefault();
@@ -136,7 +149,23 @@ class Sidebar extends Component {
 
     // nav list
     const navList = (items) => {
-      return items.map( (item, index) => navType(item, index) );
+      if(this.state.isAdmin == true) {
+        return items.map((item, index) => 
+          navType(item, index)
+      );
+      }
+      else{
+        let newItems = [];
+        items.forEach( item => {
+          if(item.forAll == true){
+            newItems.push(item);
+          }
+        })
+        return newItems.map((item, index) => 
+            navType(item, index)
+      );
+      }
+      
     };
 
     const isExternal = (url) => {

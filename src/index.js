@@ -16,17 +16,15 @@ import SessionQuestions from './views/SessionQuestions/SessionQuestions'
 import '../customStyle.css'
 import * as firebase from 'firebase';
 import 'firebase/firestore';
-
-ReactDOM.render((
-  <HashRouter>
-    <Switch>
+let Routes = (
+  <Switch>
       <Route path="/dashboard" name="Home" component={Full} />
       <Route path="/rooms" name="Home" component={Full} />
       <Route path="/events" name="Home" component={Full} />
       <Route path="/session" name="Home" component={Full} />
       <Route path="/attendance" name="Home" component={Full} />
       <Route path="/attendee" name="Home" component={Full} />
-       <Route path="/speakers" name="Home" component={Full} />
+      <Route path="/speakers" name="Home" component={Full} />
       <Route path="/questions" name="Home" component={Full} />
       <Route path="/registration" name="Home" component={Full} />
       <Route path="/registrationList" name="Home" component={Full} />
@@ -39,12 +37,15 @@ ReactDOM.render((
       <Route path="/role" name="Home" component={Full} />
       <Route path='/initialQuestions' name='Home' component={Full} />
       <Route path='/sessionRegistration' name='Home' component={Full} />
-      
-
       <Route exact path="/sessionQuestions" name="Session Questions" component={SessionQuestions} />
       <Route exact path="/register" name="Register" component={Register} />
       <Route exact path="/logOut" name="logOut" component={Logout} />
       <Route path="/" name="Login" component={Login} />
     </Switch>
+);
+
+ReactDOM.render((
+  <HashRouter>
+    {Routes}
   </HashRouter>
 ), document.getElementById('root'));

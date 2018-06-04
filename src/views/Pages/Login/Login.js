@@ -43,20 +43,21 @@ class Login extends Component {
           if(response.size > 0){
             response.forEach(doc => {
               let profile = doc.data().profileServices;
-              profile.forEach(pItem => {
-                if (pItem == 'Admin') {
-                  thisRef.setState({
-                    isAdmin : true
-                  })
-                }
-              })
+              localStorage.setItem('roles' , profile);
+              // profile.forEach(pItem => {
+              //   if (pItem == 'Admin') {
+              //     thisRef.setState({
+              //       isAdmin : true
+              //     })
+              //   }
+              // })
             })
-            if(thisRef.state.isAdmin ==  true){
+           // if(thisRef.state.isAdmin ==  true){
               thisRef.loginToPortal(email, pwd);
-            }
-            else{
-              thisRef.setState({ loginMessage: "You do not have admin rights..." });
-            }
+            //}
+            // else{
+            //   thisRef.setState({ loginMessage: "You do not have admin rights..." });
+            // }
           }
           else{
             thisRef.setState({ loginMessage: "Please register before logging in..." });

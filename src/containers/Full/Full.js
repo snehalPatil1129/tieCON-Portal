@@ -36,11 +36,25 @@ class Full extends Component {
     super(props);
     this.state = {
       authUser: false,
-      initialLoad: true
+      initialLoad: true,
+      roles: [],
+      isAdmin: false
     }
   }
   componentWillMount() {
     let thisRef = this;
+    const roleItems = localStorage.getItem("roles");
+    if (roleItems !== null) {
+      const roles = localStorage.getItem("roles").split(",");
+      roles.forEach(role => {
+        if (role === 'Admin') {
+          this.setState({
+            isAdmin: true
+          })
+        }
+      })
+    }
+
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         thisRef.setState({
@@ -59,6 +73,53 @@ class Full extends Component {
     });
   }
   render() {
+    let AdminPanels = null;
+    if (this.state.isAdmin == true) {
+      AdminPanels = (
+        <Switch>
+          <Route path="/dashboard" name="Dashboard" component={Dashboard} />
+          <Route path="/user" name="User" component={User} />
+          <Route path="/role" name="Role" component={Role} />
+          <Route path="/events" name="Events" component={Events} />
+          <Route path='/registration' name='Registration' component={Registration} />
+          <Route path='/attendance' name='Attendance' component={Attendance} />
+          <Route path='/session' name='Session' component={Session} />
+          <Route path='/rooms' name='Rooms' component={Rooms} />
+          <Route path='/registrationList' name='Registration List' component={RegistrationList} />
+          <Route path='/attendee' name='Attendee' component={Attendee} />
+          <Route path='/speakers' name='Speakers' component={Speakers} />
+          <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
+          <Route path='/sessionReport' name='Session Report' component={SessionReport} />
+          <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
+          <Route path='/aboutUs' name='AboutUs' component={AboutUs} />
+          <Route path='/sponsor' name='Sponsor' component={Sponsor} />
+          <Route path='/logOut' name='logOut' component={Logout} />
+          <Route path='/initialQuestions' name='Initial Questions' component={InitialQuestions} />
+          <Route path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
+
+          <Redirect from="/" to="/dashboard" />
+        </Switch>
+      )
+    }
+    else {
+      AdminPanels = (
+        <Switch>
+          <Route path="/dashboard" name="Dashboard" component={Dashboard} />
+          <Route path="/events" name="Events" component={Events} />
+          <Route path='/attendance' name='Attendance' component={Attendance} />
+          <Route path='/registrationList' name='Registration List' component={RegistrationList} />
+          <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
+          <Route path='/sessionReport' name='Session Report' component={SessionReport} />
+          <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
+          <Route path='/aboutUs' name='AboutUs' component={AboutUs} />
+          <Route path='/sponsor' name='Sponsor' component={Sponsor} />
+          <Route path='/logOut' name='logOut' component={Logout} />
+          <Route path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
+          <Redirect from="/" to="/dashboard" />
+        </Switch>
+      )
+    }
+
     if (!this.state.initialLoad) {
       if (this.state.authUser == true) {
         return (
@@ -69,29 +130,7 @@ class Full extends Component {
               <main className="main">
                 <Breadcrumb />
                 <Container fluid>
-                  <Switch>
-                    <Route path="/dashboard" name="Dashboard" component={Dashboard} />
-                    <Route path="/user" name="User" component={User} />
-                    <Route path="/role" name="Role" component={Role} />
-                    <Route path="/events" name="Events" component={Events} />
-                    <Route path='/registration' name='Registration' component={Registration} />
-                    <Route path='/attendance' name='Attendance' component={Attendance} />
-                    <Route path='/session' name='Session' component={Session} />
-                    <Route path='/rooms' name='Rooms' component={Rooms} />
-                    <Route path='/registrationList' name='Registration List' component={RegistrationList} />
-                    <Route path='/attendee' name='Attendee' component={Attendee} />
-                    <Route path='/speakers' name='Speakers' component={Speakers} />
-                    <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
-                    <Route path='/sessionReport' name='Session Report' component={SessionReport} />
-                    <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
-                    <Route path='/aboutUs' name='AboutUs' component={AboutUs} />
-                    <Route path='/sponsor' name='Sponsor' component={Sponsor} />
-                    <Route path='/logOut' name='logOut' component={Logout} />
-                    <Route path='/initialQuestions' name='Initial Questions' component={InitialQuestions} />
-                    <Route path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
-                    
-                    <Redirect from="/" to="/dashboard" />
-                  </Switch>
+                  {AdminPanels}
                 </Container>
               </main>
               <Aside />

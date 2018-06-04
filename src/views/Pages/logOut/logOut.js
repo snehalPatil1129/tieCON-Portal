@@ -4,6 +4,7 @@ import {Container, Row, Col, Button, Input, InputGroupAddon, InputGroup, InputGr
 import { Auth } from '../../../services/Authentication/Auth';
 class Logout extends Component {
  componentDidMount (){
+   localStorage.clear();
     Auth.logOut(); 
  }
  render () {
