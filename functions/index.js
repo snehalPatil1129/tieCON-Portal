@@ -142,8 +142,97 @@ exports.createUser = functions.firestore
             .add(userDetails)
             .then((docRef) => {
                 console.log('Updated Session User Info:', newValue);
+                return;
             })
             .catch((ex) => {
                 console.log('Error Updating Session User Info:', ex);
             });
     });
+
+
+exports.registerSpeaker = functions.https.onRequest((request, response) => {
+    if (request.method !== 'POST') {
+        return response.status(403).send('Forbidden!');
+    }
+    let req = JSON.parse(request.body);
+
+    if (!req.userEmail) {
+        return response.status(400).send('Invalid user email');
+    }
+    if (!req.password) {
+        return response.status(400).send('Invalid password');
+    }
+    if (!req.displayName) {
+        return response.status(400).send('Invalid display name');
+    }
+   
+    if (!req.firstName) {
+        return response.status(400).send('Invalid firstName');
+    }
+    if (!req.lastName) {
+        return response.status(400).send('Invalid lastName');
+    }
+    if (!req.fullName) {
+        return response.status(400).send('Invalid fullName');
+    }
+
+    if (!req.roleName) {
+        return response.status(400).send('Invalid roleName');
+    }
+   
+    return admin.auth().createUser({
+        email: req.userEmail,
+        emailVerified: false,
+        password: req.password,
+        displayName: req.displayName,
+        disabled: false
+    })
+        .then((userRecord) => {
+            console.log("Successfully created new speaker:", userRecord.uid);
+            let speakerDetails = {
+                address: req.address,
+                contactNo: req.contactNo,
+                email: req.userEmail,
+                firstName: req.firstName,
+                lastName: req.lastName,
+                password: req.password,
+                fullName: req.fullName,
+                roleName: req.roleName,
+                timestamp: req.timestamp,
+                registrationType: req.registrationType,
+                briefInfo: req.briefInfo,
+                info: req.info,
+                attendeeCount: req.attendeeCount,
+                attendeeLabel: req.attendeeLabel,
+                attendanceId: req.attendanceId,
+                sessionId: req.sessionId,
+                linkedInURL: req.linkedInURL,
+                profileImageURL: req.profileImageURL
+            };
+
+            return addSpeaker(req.userEmail, req.displayName, response, req.password, speakerDetails, userRecord.uid);
+        })
+        .catch((error) => {
+            console.log("Error creating new Speaker:", error);
+            return response.status(500).send(error);
+        });
+});
+
+function addSpeaker(email, displayName, response, password, speakerDetails, uid) {
+    return admin.firestore().collection("Speakers").doc(uid)
+        .set(speakerDetails)
+        .then((docRef) => {
+            console.log('Speaker added', speakerDetails);
+            let resData = JSON.stringify({
+                status: "success",
+                uid: uid,
+                abc: 'Snehal Kale'
+            });
+            return response.status(200).send(resData);
+        })
+        .catch((ex) => {
+            console.log('Error Adding Speaker', ex);
+            return response.status(500).send("Error updating Speaker table for user:" + ex);
+        });
+}
+ 

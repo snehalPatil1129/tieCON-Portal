@@ -26,6 +26,11 @@ export default {
       icon: 'icon-note'
     },
     {
+      name: 'Speakers',
+      url: '/speakers',
+      icon: 'icon-microphone'
+    },
+    {
       name: 'Initial Questions',
       url: '/initialQuestions',
       icon: 'icon-note'
