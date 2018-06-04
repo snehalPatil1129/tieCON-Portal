@@ -17,6 +17,7 @@ import Registration from '../../views/Registration/Registration';
 import Rooms from '../../views/Rooms/Rooms';
 import RegistrationList from '../../views/RegistrationList/registrationList';
 import Attendee from '../../views/Attendee/Attendee';
+import Speakers from '../../views/Speakers/Speakers';
 import AttendeeReport from '../../views/Reports/Attendee Report/AttendeeReport';
 import SessionReport from '../../views/Reports/Sessions Report/SessionReport';
 import SessionsReport from '../../views/Reports/Sessions/sessions';
@@ -77,6 +78,7 @@ class Full extends Component {
                     <Route path='/rooms' name='Rooms' component={Rooms} />
                     <Route path='/registrationList' name='Registration List' component={RegistrationList} />
                     <Route path='/attendee' name='Attendee' component={Attendee} />
+                    <Route path='/speakers' name='Speakers' component={Speakers} />
                     <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
                     <Route path='/sessionReport' name='Session Report' component={SessionReport} />
                     <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
