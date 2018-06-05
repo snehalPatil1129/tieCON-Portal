@@ -196,8 +196,6 @@ class SpeakerForm extends Component {
         let compRef = this;
         this.setState({ submitted: true });
         const { speaker } = this.state;
-        console.log("speaker", speaker);
-
         compRef.onHandleValidations(speaker);
         compRef.checkPreviuosCount();
     }
@@ -251,7 +249,6 @@ class SpeakerForm extends Component {
                 )
             })
                 .then(response => {
-                    console.log("response", response);
                     this.updateCount(speakerCountId, speCount);
                     toast.success("User Registered Successfully", {
                         position: toast.POSITION.BOTTOM_RIGHT,
