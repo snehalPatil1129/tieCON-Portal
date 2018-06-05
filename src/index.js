@@ -29,7 +29,10 @@ let Routes = (
       <Route path="/registration" name="Home" component={Full} />
       <Route path="/registrationList" name="Home" component={Full} />
       <Route path="/sponsor" name="Home" component={Full} />
-      <Route path="/aboutUs" name="Home" component={Full} />
+      <Route path="/staticPages/aboutUs" name="Home" component={Full} />
+      <Route path="/staticPages/locationDetails" name="Home" component={Full} />
+      <Route path='/staticPages/aboutEternus' name='AboutEternusSoltions' component={Full} />
+      <Route path="/staticPages/helpDesk" name="Home" component={Full} />
       <Route path='/attendeeReport' name='Home' component={Full} />
       <Route path='/sessionReport' name='Home' component={Full} />
       <Route path='/sessionsReport' name='Home' component={Full} />

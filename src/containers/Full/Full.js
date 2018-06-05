@@ -22,7 +22,10 @@ import Speakers from '../../views/Speakers/Speakers';
 import AttendeeReport from '../../views/Reports/Attendee Report/AttendeeReport';
 import SessionReport from '../../views/Reports/Sessions Report/SessionReport';
 import SessionsReport from '../../views/Reports/Sessions/sessions';
-import AboutUs from '../../views/AboutUs/AboutUs';
+import AboutUs from '../../views/Static/AboutUs/AboutUs';
+import LocationDetails from '../../views/Static/Location/Location';
+import AboutEternus from '../../views/Static/AboutEternus/AboutEternus';
+import HelpDesk from '../../views/Static/HelpDesk/HelpDesk';
 import Sponsor from '../../views/Sponsor/Sponsor';
 import Logout from '../../views/Pages/logOut/';
 import * as firebase from 'firebase';
@@ -91,7 +94,10 @@ class Full extends Component {
           <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
           <Route path='/sessionReport' name='Session Report' component={SessionReport} />
           <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
-          <Route path='/aboutUs' name='AboutUs' component={AboutUs} />
+          <Route path='/staticPages/aboutUs' name='AboutUs' component={AboutUs} />
+          <Route path='/staticPages/locationDetails' name='location Details' component={LocationDetails} />
+          <Route path='/staticPages/aboutEternus' name='AboutEternusSoltions' component={AboutEternus} />
+          <Route path='/staticPages/helpDesk' name='HelpDesk' component={HelpDesk} />
           <Route path='/sponsor' name='Sponsor' component={Sponsor} />
           <Route path='/logOut' name='logOut' component={Logout} />
           <Route path='/initialQuestions' name='Initial Questions' component={InitialQuestions} />

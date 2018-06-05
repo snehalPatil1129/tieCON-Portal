@@ -6,6 +6,12 @@ export default {
       forAll : true
     },
     {
+      name: 'Events',
+      url: '/events',
+      icon: 'icon-home',
+      forAll : false
+    },
+    {
       name: 'Session',
       url: '/session',
       icon: 'icon-microphone',
@@ -17,12 +23,7 @@ export default {
       icon: 'icon-home',
       forAll : false
     },
-    {
-      name: 'Events',
-      url: '/events',
-      icon: 'icon-home',
-      forAll : false
-    },
+    
      {
       name: 'Attendance',
       url: '/attendance',
@@ -53,17 +54,51 @@ export default {
       icon: 'icon-note',
       forAll : false
     },
-    {
-      name: 'About Us',
-      url: '/aboutUs',
-      icon: 'icon-note',
-      forAll : false
-    },  
+    // {
+    //   name: 'About Us',
+    //   url: '/aboutUs',
+    //   icon: 'icon-note',
+    //   forAll : false
+    // },
+    // {
+    //   name: 'About Eternus',
+    //   url: '/aboutEternus',
+    //   icon: 'icon-note',
+    //   forAll : false
+    // },   
     {
       name: 'Session Registration',
       url: '/sessionRegistration',
       icon: 'icon-note',
       forAll : false
+    },
+    {
+      name: 'Static Pages',
+      url: '/staticPages',
+      icon: 'icon-puzzle',
+      forAll : false,
+      children: [
+        {
+          name: 'AboutUS',
+          url: '/staticPages/aboutUs',
+          icon: 'icon-puzzle'
+        },
+        {
+          name: 'About Eternus',
+          url: '/staticPages/aboutEternus',
+          icon: 'icon-note'
+        }, 
+        {
+          name: 'Help Desk',
+          url: '/staticPages/helpDesk',
+          icon: 'icon-note'
+        }, 
+        {
+          name: 'Location Details',
+          url: '/staticPages/locationDetails',
+          icon: 'icon-note'
+        }, 
+      ]
     },      
     {
       title: true,
@@ -101,7 +136,6 @@ export default {
       },
       forAll : false
     },
-   
     {
       name: 'Role',
       url: '/role',

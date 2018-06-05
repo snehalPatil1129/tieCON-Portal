@@ -6,51 +6,76 @@ import {
 
 import * as firebase from 'firebase';
 import 'firebase/firestore';
-import { DBUtil } from '../../services';
+import { DBUtil } from '../../../services';
 import { ToastContainer, toast } from 'react-toastify';
 
-class AboutUs extends Component{
+class AboutEternus extends Component{
     constructor(props) {
         super(props);
         this.state = {
             info: '',
+            information : '',
+            url :''
         };
         this.changeFunction = this.changeFunction.bind(this);
+        this.urlChangeFunction = this.urlChangeFunction.bind(this);
         this.submitFunction = this.submitFunction.bind(this);
         this.resetField = this.resetField.bind(this);
     }
-
+    componentWillMount () {
+        DBUtil.getDocRef("AboutEternusSolutions").doc("EternusInfo").onSnapshot((snapshot) =>{
+            let information= "";
+            let url= "";
+               information = snapshot.data().info;
+               url = snapshot.data().url ? snapshot.data().url : '';
+                this.setState({
+                    information : information,
+                    url : url
+                })
+        })
+    }
     // Method to set text area value
     changeFunction(event) {
         const { name, value } = event.target;
-        const { info } = this.state;
+        const { information } = this.state;
         this.setState({
-            info: value,
+            information: value,
+        });
+    }
+
+    urlChangeFunction(event) {
+        const { name, value } = event.target;
+        const { url } = this.state;
+        this.setState({
+            url: value,
         });
     }
 
     // Method for submit & pass data to database
     submitFunction(event){
         event.preventDefault();        
-        const { info } = this.state;   
+        const { information } = this.state;
+        const { url } = this.state;   
         let componentRef = this;
-        if (info != "") {
-            let tableName = "AboutUs";
+        if (information != "") {
+            let tableName = "AboutEternusSolutions";
+            let docName = "EternusInfo"
             let doc = {
-                info: info,
+                url: url,
+                info: information,
                 timestamp: new Date()
             }
              
-        DBUtil.addObj(tableName, doc, function (id, error) {    
+        DBUtil.addDoc(tableName, docName ,doc, function (id, error) {    
             if(id != ""){
-                toast.success("About us added successfully.", {
+                toast.success("Information About Eternus Solutions added successfully.", {
                     position: toast.POSITION.BOTTOM_RIGHT,
                 });
                 componentRef.resetField(true);
             }
           },
             function (err) {
-              toast.error("Error: About us not saved.", {
+              toast.error("Error: Information About Eternus Solutions not saved.", {
                 position: toast.POSITION.BOTTOM_RIGHT,
               });
             });
@@ -60,7 +85,8 @@ class AboutUs extends Component{
     // Method for reset all fields
     resetField(resetFlag) {
         this.setState({
-            info: ''
+            information: '',
+            url: ''
         });
         if (resetFlag != true) {
             toast.success("About us form reset successfully.", {
@@ -76,14 +102,24 @@ class AboutUs extends Component{
                 <Col md="12">
                     <Card className="mx-6">
                     <CardBody className="p-4">
-                        <h1>About Us</h1>
+                        <h1>About Eternus Solutions</h1>
                         <FormGroup row>
                         <Col xs="12" md="12">
                             <InputGroup className="mb-3">
                             <InputGroupAddon addonType="prepend">
                                 <InputGroupText><i className="fa fa-info"></i></InputGroupText>
                             </InputGroupAddon>
-                            <Input type="textarea" placeholder="Info" name="info" value={this.state.info} onChange={this.changeFunction} required />
+                            <Input type="textarea"  name="info" value={this.state.information} onChange={this.changeFunction}  />
+                            </InputGroup>
+                        </Col>
+                        </FormGroup>
+                        <FormGroup row>
+                        <Col xs="12" md="6">
+                            <InputGroup className="mb-3">
+                            <InputGroupAddon addonType="prepend">
+                                <InputGroupText><i className="fa fa-info"></i></InputGroupText>
+                            </InputGroupAddon>
+                            <Input type="text"  name="url" value={this.state.url} onChange={this.urlChangeFunction}/>
                             </InputGroup>
                         </Col>
                         </FormGroup>
@@ -103,4 +139,4 @@ class AboutUs extends Component{
     }
 }
 
-export default AboutUs;
+export default AboutEternus;
