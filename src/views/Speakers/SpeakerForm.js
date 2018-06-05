@@ -204,7 +204,6 @@ class SpeakerForm extends Component {
     createSpeaker() {
         let speakerCount = this.state.speakerCount;
         let speCount = this.state.speCount;
-
         const { speaker } = this.state;
         let compRef = this;
         let speakerLabel = "SPE";
@@ -212,54 +211,42 @@ class SpeakerForm extends Component {
         let speakerCountId = this.state.speakerCountId;
         let speakerCode = speakerLabel + "-" + speakerCount;
         if (speaker.firstName && speaker.lastName && !this.state.invalidEmail && !this.state.invalidProfile) {
-            let tblspeaker = "speaker";
-            let speakerPassword = 'ES' + Math.floor(1000 + Math.random() * 9000);
 
+            let tblspeaker = "speaker";
+        
             let speakerCountString = speCount.toString();
-            fetch('https://us-central1-tiecon-portal.cloudfunctions.net/registerSpeaker', {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: new Headers({
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }),
-                body: JSON.stringify(
-                    {
-                        firstName: speaker.firstName,
-                        lastName: speaker.lastName,
-                        userEmail: speaker.email,
-                        password: speakerPassword,
-                        contactNo: speaker.contactNo,
-                        roleName: roleName,
-                        address: speaker.address,
-                        displayName: speaker.firstName + " " + speaker.lastName,
-                        fullName: speaker.firstName + " " + speaker.lastName,
-                        timestamp: new Date(),
-                        registrationType: 'On Spot Registration',
-                        briefInfo: speaker.briefInfo,
-                        info: speaker.info,
-                        speakerCount: speakerCountString,
-                        speakerLabel: speakerLabel,
-                        attendanceId: '',
-                        sessionId: '',
-                        linkedInURL: speaker.linkedInURL,
-                        profileImageURL: speaker.profileImageURL
-                    }
-                )
-            })
-                .then(response => {
-                    this.updateCount(speakerCountId, speCount);
-                    toast.success("User Registered Successfully", {
-                        position: toast.POSITION.BOTTOM_RIGHT,
-                    });
-                    this.resetField();
-                }
-                ).catch(function (error) {
-                    toast.error("Registration failed", {
-                        position: toast.POSITION.BOTTOM_RIGHT,
-                    });
+
+            let doc = {
+                firstName: speaker.firstName,
+                lastName: speaker.lastName,
+                email: speaker.email,
+                address: speaker.address,
+                contactNo: speaker.contactNo,
+                roleName: roleName,
+                displayName: speaker.firstName + " " + speaker.lastName,
+                fullName: speaker.firstName + " " + speaker.lastName,
+                timestamp: new Date(),
+                briefInfo: speaker.briefInfo,
+                info: speaker.info,
+                speakerCount: speakerCountString,
+                speakerLabel: speakerLabel,
+                attendanceId: '',
+                sessionId: '',
+                linkedInURL: speaker.linkedInURL,
+                profileImageURL: speaker.profileImageURL
+            }
+
+            DBUtil.addObj("Speakers", doc, function (response) {
+                compRef.updateCount(speakerCountId, speCount);
+                toast.success("Speaker Registered Successfully", {
+                    position: toast.POSITION.BOTTOM_RIGHT,
                 });
+                compRef.resetField();
+            }, function (err) {
+                toast.error("Registration failed", {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+            });
         }
     }
 
@@ -349,7 +336,7 @@ class SpeakerForm extends Component {
                                             <InputGroupAddon addonType="prepend">
                                                 <InputGroupText>@</InputGroupText>
                                             </InputGroupAddon>
-                                            <Input type="text" disabled={this.state.updateflag} placeholder="Email" name="email" value={this.state.speaker.email} onChange={this.changeFunction} required />
+                                            <Input type="text" placeholder="Email" name="email" value={this.state.speaker.email} onChange={this.changeFunction} required />
                                             {submitted && this.state.invalidEmail &&
                                                 <div style={{ color: "red" }} className="help-block">{this.state.emailError} </div>
                                             }

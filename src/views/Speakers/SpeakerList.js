@@ -37,7 +37,6 @@ class SpeakerList extends Component {
                         id: doc.id,
                         name: speakerObj.firstName + ' ' + speakerObj.lastName,
                         email: speakerObj.email,
-                        password: speakerObj.password != undefined ? speakerObj.password : '',
                         contactNo: speakerObj.contactNo,
                         timestamp: speakerObj.timestamp != undefined ? moment(speakerObj.timestamp).format('DD-MMM HH:SS') : '',
                         speakerLabel: speakerObj.speakerLabel,
@@ -195,7 +194,6 @@ class SpeakerList extends Component {
                                             selectRow={selectRowProp} options={options} exportCSV={true} >
                                             <TableHeaderColumn dataField='id' headerAlign='left' isKey hidden>Id</TableHeaderColumn>
                                             <TableHeaderColumn dataField='speakerCode' headerAlign='left' width='100' dataSort csvHeader='Code'>Code</TableHeaderColumn>
-                                            <TableHeaderColumn dataField='password' headerAlign='left' width='120' dataSort csvHeader='Password'>Password</TableHeaderColumn>
                                             <TableHeaderColumn dataField='name' headerAlign='left' width='160' dataSort csvHeader='Name'>Name</TableHeaderColumn>
                                             <TableHeaderColumn dataField='email' headerAlign='left' width='160' csvHeader='Email'>Email</TableHeaderColumn>
                                             <TableHeaderColumn dataField='edit' dataFormat={this.onEditAttendee.bind(this)} headerAlign='left' width='30' export={false}></TableHeaderColumn>
