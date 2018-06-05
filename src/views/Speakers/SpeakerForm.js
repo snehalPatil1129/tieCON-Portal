@@ -4,6 +4,7 @@ import {
     Card, CardBody, Button, Label, FormGroup
 } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
+import { DBUtil } from '../../services';
 
 class SpeakerForm extends Component {
     constructor(props) {
@@ -25,17 +26,58 @@ class SpeakerForm extends Component {
                 roleName: ''
             },
             submitted: false,
+            invalidEmail: false,
+            invalidContact: false,
+            emailError: '',
+            contactError: '',
+            speakerCount: '',
+            speCount: '',
+            speakerCountId: ''
         }
         this.submitFunction = this.submitFunction.bind(this);
         this.changeFunction = this.changeFunction.bind(this);
         this.setInputToAlphabets = this.setInputToAlphabets.bind(this);
         this.setInputToNumeric = this.setInputToNumeric.bind(this);
+        this.onHandleValidations = this.onHandleValidations.bind(this);
+        this.resetField = this.resetField.bind(this);
+        this.checkPreviuosCount = this.checkPreviuosCount.bind(this);
+        this.createSpeaker = this.createSpeaker.bind(this);
+        this.updateCount = this.updateCount.bind(this);
+        this.updateFunction = this.updateFunction.bind(this);
+    }
 
+    componentWillMount() {
+        let thisRef = this;
+        if (this.props.match.params.id != undefined) {
+            this.setState({ updateflag: true })
+            var docRef = DBUtil.getDocRef("Speakers").doc(this.props.match.params.id);
+            docRef.get().then(function (doc) {
+                if (doc.exists) {
+                    let speakerData = doc.data();
+                    thisRef.setState({
+                        speaker: {
+                            id: doc.id,
+                            firstName: speakerData.firstName,
+                            lastName: speakerData.lastName,
+                            email: speakerData.email,
+                            contactNo: speakerData.contactNo,
+                            address: speakerData.address,
+                            briefInfo: speakerData.briefInfo,
+                            info: speakerData.info,
+                            profileImageURL: speakerData.profileImageURL,
+                            linkedInURL: speakerData.linkedInURL
+                        },
+                    });
+                }
+            })
+        }
     }
 
     changeFunction(event) {
         const { name, value } = event.target;
         const { speaker } = this.state;
+        this.state.invalidContact = false;
+        this.state.invalidEmail = false;
         this.setState({
             speaker: {
                 ...speaker,
@@ -44,6 +86,95 @@ class SpeakerForm extends Component {
         });
     }
 
+    updateFunction() {
+        let compRef = this;
+        this.setState({ submitted: true });
+        const { speaker } = this.state;
+
+        compRef.onHandleValidations(speaker);
+
+        if (speaker.firstName && speaker.lastName && !this.state.invalidEmail && !this.state.invalidProfile) {
+            let tblSpeaker = "Speakers";
+            DBUtil.getDocRef(tblSpeaker).doc(speaker.id).update({
+                "firstName": speaker.firstName,
+                "lastName": speaker.lastName,
+                "email": speaker.email,
+                "contactNo": speaker.contactNo,
+                "address": speaker.address,
+                "timestamp": new Date(),
+                "registrationType": 'On Spot Registration',
+                "briefInfo": speaker.briefInfo,
+                "info": speaker.info,
+                "profileImageURL": speaker.profileImageURL,
+                "linkedInURL": speaker.linkedInURL,
+                "fullName": speaker.firstName + ' ' + speaker.lastName,
+                "displayName": speaker.firstName + " " + speaker.lastName
+            }).then(function () {
+                toast.success("speaker updated successfully.", {
+                    position: toast.POSITION.BOTTOM_RIGHT,
+                });
+                setTimeout(() => {
+                    compRef.props.history.push('/speakerList');
+                }, 2000);
+            });
+        }
+    }
+
+    resetField(resetFlag) {
+        this.setState({
+            speaker: {
+                firstName: '',
+                lastName: '',
+                email: '',
+                contactNo: '',
+                address: '',
+                briefInfo: '',
+                info: '',
+                profileImageURL: '',
+                linkedInURL: ''
+            },
+            invalidEmail: false,
+            submitted: false
+        });
+    }
+
+    onHandleValidations(speaker) {
+        if (speaker.email == "") {
+            speaker.email = null;
+        }
+        if (speaker.contactNo == "") {
+            speaker.contactNo = null;
+        }
+        if (speaker.email != null) {
+            let lastAtPos = speaker.email.lastIndexOf('@');
+            let lastDotPos = speaker.email.lastIndexOf('.');
+            if (!(lastAtPos < lastDotPos && lastAtPos > 0 && speaker.email.indexOf('@@') == -1 && lastDotPos > 2 && (speaker.email.length - lastDotPos) > 2)) {
+                this.state.invalidEmail = true;
+                this.setState({ emailError: "*Invalid Email" });
+            }
+            else {
+                this.state.invalidEmail = false;
+                this.setState({ emailError: " " });
+            }
+        }
+        else if (speaker.email == null || speaker.email != " ") {
+            this.state.invalidEmail = true;
+            this.setState({ emailError: "*Required" });
+        }
+
+        if (speaker.contactNo != null && (speaker.contactNo.length < 10 || speaker.contactNo.length > 10)) {
+            this.state.invalidContact = true;
+            this.setState({ contactError: "*Invalid Contact No" });
+        }
+        else if (speaker.contactNo == null || speaker.contactNo == "") {
+            this.state.invalidContact = true;
+            this.setState({ contactError: "*Required " });
+        }
+        else {
+            this.state.invalidContact = false;
+            this.setState({ contactError: " " });
+        }
+    }
     // Method for set only alphabets
     setInputToAlphabets(e) {
         const re = /[a-zA-Z]+/g;
@@ -60,20 +191,120 @@ class SpeakerForm extends Component {
         }
     }
 
-
     submitFunction(event) {
         event.preventDefault();
         let compRef = this;
         this.setState({ submitted: true });
         const { speaker } = this.state;
         console.log("speaker", speaker);
+
+        compRef.onHandleValidations(speaker);
+        compRef.checkPreviuosCount();
+    }
+
+    //Method for speaker creation
+    createSpeaker() {
+        let speakerCount = this.state.speakerCount;
+        let speCount = this.state.speCount;
+
+        const { speaker } = this.state;
+        let compRef = this;
+        let speakerLabel = "SPE";
+        let roleName = "Speaker";
+        let speakerCountId = this.state.speakerCountId;
+        let speakerCode = speakerLabel + "-" + speakerCount;
+        if (speaker.firstName && speaker.lastName && !this.state.invalidEmail && !this.state.invalidProfile) {
+            let tblspeaker = "speaker";
+            let speakerPassword = 'ES' + Math.floor(1000 + Math.random() * 9000);
+
+            let speakerCountString = speCount.toString();
+            fetch('https://us-central1-tiecon-portal.cloudfunctions.net/registerSpeaker', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: new Headers({
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }),
+                body: JSON.stringify(
+                    {
+                        firstName: speaker.firstName,
+                        lastName: speaker.lastName,
+                        userEmail: speaker.email,
+                        password: speakerPassword,
+                        contactNo: speaker.contactNo,
+                        roleName: roleName,
+                        address: speaker.address,
+                        displayName: speaker.firstName + " " + speaker.lastName,
+                        fullName: speaker.firstName + " " + speaker.lastName,
+                        timestamp: new Date(),
+                        registrationType: 'On Spot Registration',
+                        briefInfo: speaker.briefInfo,
+                        info: speaker.info,
+                        speakerCount: speakerCountString,
+                        speakerLabel: speakerLabel,
+                        attendanceId: '',
+                        sessionId: '',
+                        linkedInURL: speaker.linkedInURL,
+                        profileImageURL: speaker.profileImageURL
+                    }
+                )
+            })
+                .then(response => {
+                    console.log("response", response);
+                    this.updateCount(speakerCountId, speCount);
+                    toast.success("User Registered Successfully", {
+                        position: toast.POSITION.BOTTOM_RIGHT,
+                    });
+                    this.resetField();
+                }
+                ).catch(function (error) {
+                    toast.error("Registration failed", {
+                        position: toast.POSITION.BOTTOM_RIGHT,
+                    });
+                });
+        }
+    }
+
+    updateCount(speakerCountId, speCount) {
+        DBUtil.getDocRef("AttendeeCount").doc(speakerCountId).update({
+            "speCount": speCount
+        }).then(function () {
+            //console.log("updated successfully");
+        })
+    }
+
+    //Method to check previous count of speaker
+    checkPreviuosCount() {
+        let compRef = this;
+        let nextCount;
+        var docRef = DBUtil.getDocRef("AttendeeCount");
+        docRef.get().then(function (snapshot) {
+
+            let speCount;
+            let speakerCountId;
+            snapshot.forEach(function (doc) {
+                speakerCountId = doc.id;
+                speCount = doc.data().speCount;
+            });
+
+            nextCount = speCount + 1;
+            speCount = nextCount;
+
+            compRef.setState({
+                speakerCount: nextCount,
+                speCount: speCount,
+                speakerCountId: speakerCountId
+            });
+            compRef.createSpeaker();
+        })
     }
 
     render() {
         const { speaker, submitted } = this.state;
 
         if (this.state.updateflag) {
-            this.headerText = "Attendee";
+            this.headerText = "Speaker";
             this.buttons = <Button type="submit" size="md" color="success" onClick={this.updateFunction} ><i className="icon-note"></i> Update</Button>
         }
         else {
