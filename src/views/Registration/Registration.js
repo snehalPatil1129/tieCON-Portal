@@ -10,7 +10,9 @@ import 'firebase/firestore';
 import { DBUtil } from '../../services';
 import { ToastContainer, toast } from 'react-toastify';
 import Avatar from 'react-avatar';
-import QRCode from 'qrcode'
+import QRCode from 'qrcode';
+import 'firebase/auth';
+const auth = firebase.auth();
 const data = require('../../../public/attendeeData/attendeeData.json');
 
 class Registration extends Component {
@@ -49,7 +51,7 @@ class Registration extends Component {
       updateflag: false,
       attendeePassword: '',
       displayPasswordFlag: false,
-      attendeeCode:''
+      attendeeCode: ''
     };
     this.changeFunction = this.changeFunction.bind(this);
     this.submitFunction = this.submitFunction.bind(this);
@@ -59,10 +61,10 @@ class Registration extends Component {
     this.handleSelectChange = this.handleSelectChange.bind(this);
     this.setInputToAlphabets = this.setInputToAlphabets.bind(this);
     this.setInputToNumeric = this.setInputToNumeric.bind(this);
-    this.bulkUpload = this.bulkUpload.bind(this);
     this.checkPreviuosCount = this.checkPreviuosCount.bind(this);
     this.createAttendee = this.createAttendee.bind(this);
     this.updateCount = this.updateCount.bind(this);
+    this.doCreateUserWithEmailAndPassword = this.doCreateUserWithEmailAndPassword.bind(this);
   }
 
   // Method For render/set default profile data
@@ -111,30 +113,30 @@ class Registration extends Component {
         profileIDs.push(doc.id);
       });
       for (var i = 0; i < profiles.length; i++) {
+        if(profiles[i].profileName!="Speaker")
         profileList.push({ label: profiles[i].profileName, value: profiles[i].profileName });
       }
       componentRef.setState({ profileDropDown: profileList })
     });
   }
 
-  //Method for bulk uploading Attendee data
-  bulkUpload() {
-    var dataArray = data;
-    for (var index in dataArray) {
-      let collectionName = index;
-      for (var doc in dataArray[index]) {
-        if (dataArray[index].hasOwnProperty(doc)) {
-          DBUtil.getDocRef(collectionName).doc(doc)
-            .set(dataArray[index][doc])
-            .then(() => {
-              // console.log('Document is successed adding to firestore!');
-            })
-            .catch(error => {
-              // console.log(error);
-            });
-        }
-      }
-    }
+  //method to signup user 
+  doCreateUserWithEmailAndPassword() {
+    const { user } = this.state;
+    let compRef = this;
+    let email = user.email;
+    let password = 'ES' + Math.floor(1000 + Math.random() * 9000);
+    this.setState({ attendeePassword: password });
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((response) => {
+        compRef.createAttendee();
+      })
+      .catch((ex) => {
+        toast.error("The email address is already in use by another account.", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+        });
+
+      });
   }
 
   // Method to set textbox values
@@ -200,8 +202,6 @@ class Registration extends Component {
     if (!user.profileServices.length || profilesArray == "") {
       this.state.invalidProfile = true;
     }
-
-
   }
 
   submitFunction(event) {
@@ -223,7 +223,6 @@ class Registration extends Component {
     compRef.checkPreviuosCount(attendeeLabel);
   }
 
-
   // Method for update attendee details
   updateFunction() {
     let compRef = this;
@@ -240,7 +239,7 @@ class Registration extends Component {
     compRef.setState({ attendeeLabel: attendeeLabel });
     compRef.onHandleValidations(user);
 
-    if (user.firstName && user.lastName && !this.state.invalidEmail &&!this.state.invalidProfile) {
+    if (user.firstName && user.lastName && !this.state.invalidEmail && !this.state.invalidProfile) {
       let tblAttendance = "Attendance", tblAttendee = "Attendee";
       if (user.profileServices.length > 0) {
         let length = user.profileServices.length;
@@ -290,14 +289,14 @@ class Registration extends Component {
     let totalCount = this.state.totalCount;
     const { user } = this.state;
     let compRef = this;
+    let password = this.state.attendeePassword;
     let attendeeLabel = this.state.attendeeLabel;
     let attendeeCountId = this.state.attendeeCountId;
-    let attendeeCode = attendeeLabel+"-"+attendeeCount;
+    let attendeeCode = attendeeLabel + "-" + attendeeCount;
+
     if (user.firstName && user.lastName && !this.state.invalidEmail && !this.state.invalidProfile) {
       let tblAttendance = "Attendance", tblAttendee = "Attendee";
-      let randomstring = 'ES' + Math.floor(1000 + Math.random() * 9000);
-      this.setState({ attendeePassword: randomstring ,
-                      attendeeCode:attendeeCode});
+      this.setState({ attendeeCode: attendeeCode });
       if (user.profileServices.length > 0) {
         let length = user.profileServices.length;
         let serviceString = user.profileServices[length - 1]
@@ -311,53 +310,43 @@ class Registration extends Component {
           this.state.user.roleName = serviceArray[0];
         }
       }
-      let atendeeCountString = attendeeCount.toString()
-      fetch('https://us-central1-tiecon-pune.cloudfunctions.net/registerUser',{
-        method: 'POST',
-        mode: 'no-cors',
-        headers: new Headers({
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }),
-        body: JSON.stringify(
-          {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userEmail: user.email,
-            password: randomstring,
-            contactNo: user.contactNo,
-            roleName: user.roleName,
-            address: user.address,
-            displayName: user.firstName + " " + user.lastName,
-            fullName: user.firstName + " " + user.lastName,
-            profileServices: user.profileServices,
-            timestamp: new Date(),
-            registrationType: 'On Spot Registration',
-            briefInfo: user.briefInfo,
-            info: user.info,
-            attendeeCount: atendeeCountString,
-            attendeeLabel: attendeeLabel,
-            attendanceId: '',
-            sessionId: '',
-            linkedInURL: user.linkedInURL,
-            profileImageURL: user.profileImageURL,
-          }
-        )
-      })
-        .then(response => {
-          this.updateCount(attendeeCountId, totalCount, delCount);
-          toast.success("User Registered Successfully", {
-            position: toast.POSITION.BOTTOM_RIGHT,
-          });
-          this.resetField();
-          this.setState({ displayPasswordFlag: true });
-        }
-        ).catch(function (error) {
-          toast.error("Registration failed", {
-            position: toast.POSITION.BOTTOM_RIGHT,
-          });
+      let atendeeCountString = attendeeCount.toString();
+
+      let doc = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: password,
+        contactNo: user.contactNo,
+        roleName: user.roleName,
+        address: user.address,
+        displayName: user.firstName + " " + user.lastName,
+        fullName: user.firstName + " " + user.lastName,
+        profileServices: user.profileServices,
+        timestamp: new Date(),
+        registrationType: 'On Spot Registration',
+        briefInfo: user.briefInfo,
+        info: user.info,
+        attendeeCount: atendeeCountString,
+        attendeeLabel: attendeeLabel,
+        attendanceId: '',
+        sessionId: '',
+        linkedInURL: user.linkedInURL,
+        profileImageURL: user.profileImageURL
+      }
+
+      DBUtil.addObj("Attendee", doc, function (response) {
+        compRef.updateCount(attendeeCountId, totalCount, delCount);
+        toast.success("User Registered Successfully", {
+          position: toast.POSITION.BOTTOM_RIGHT,
         });
+        compRef.resetField();
+        compRef.setState({ displayPasswordFlag: true });
+      }, function (err) {
+        toast.error("Registration failed", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+        });
+      });
     }
   }
 
@@ -399,7 +388,7 @@ class Registration extends Component {
         totalCount: totalCount,
         attendeeCountId: attendeeCountId
       });
-      compRef.createAttendee();
+      compRef.doCreateUserWithEmailAndPassword();
     })
   }
 
@@ -456,10 +445,10 @@ class Registration extends Component {
     const options = this.state.profileDropDown;
     this.headerText = '';
     let password = '';
-    let attendeeCode ='';
+    let attendeeCode = '';
     if (this.state.displayPasswordFlag) {
-      password = "password" + ":" + " "+this.state.attendeePassword;
-      attendeeCode="attendeeCode"+":"+ " "+this.state.attendeeCode;
+      password = "password" + ":" + " " + this.state.attendeePassword;
+      attendeeCode = "attendeeCode" + ":" + " " + this.state.attendeeCode;
     }
     if (this.state.updateflag) {
       this.headerText = "Attendee";
@@ -598,7 +587,7 @@ class Registration extends Component {
           </Col>
           <Col md="4">
             {password}
-            <br/>
+            <br />
             {attendeeCode}
           </Col>
         </Row>

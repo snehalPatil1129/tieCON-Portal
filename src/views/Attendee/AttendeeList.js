@@ -22,7 +22,6 @@ class AttendeeList extends Component {
             attendeeData: [],
             attendeeCount: 0
         }
-
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.deleteAttendee = this.deleteAttendee.bind(this);
     }
@@ -35,15 +34,16 @@ class AttendeeList extends Component {
             .get().then((snapshot) => {
                 let profileList = [];
                 snapshot.forEach(function (doc) {
-                    profileList.push({
-                        label: doc.data().profileName,
-                        value: doc.data().profileName
-                    });
+                    if (doc.data().profileName != "Speaker") {
+                        profileList.push({
+                            label: doc.data().profileName,
+                            value: doc.data().profileName
+                        });
+                    }
                 });
                 componentRef.setState({ profileDropDown: profileList });
             });
     }
-
 
     deleteAttendee(userId) {
         var x = confirm("Are you sure you want to delete?");
@@ -55,7 +55,7 @@ class AttendeeList extends Component {
         }
         else
             return false;
-    }
+       }
     // Method for print ID card
     openWin(user) {
         let briefInfo;
