@@ -64,7 +64,7 @@ class SessionForm extends Component {
             addQPopupFlag: false,
             invalidSpeaker: false,
             invalidVolunteer: false,
-            speakerArray : []
+            speakerArray: []
         };
         this.changeFunction = this.changeFunction.bind(this);
         this.submitFunction = this.submitFunction.bind(this);
@@ -154,29 +154,42 @@ class SessionForm extends Component {
 
         DBUtil.addChangeListener("Attendee", function (response) {
             response.forEach(function (doc) {
-                if (doc.data().profileServices) { 
+                if (doc.data().profileServices) {
 
                     let length = doc.data().profileServices.length || 0;
-                    for (var i = 0; i < length; i++) {                           
-                        if (doc.data().profileServices[i] == "Speaker") {
-                                speakerName = doc.data().firstName + " " + doc.data().lastName;
-                                listSpeakers.push({ label: speakerName, value: doc.id });
-                                speakerData.push({id : doc.id , speakerData: doc.data()});
-                        }
+                    for (var i = 0; i < length; i++) {
                         if (doc.data().profileServices[i] == "Volunteer") {
-                                volunteerName = doc.data().firstName + " " + doc.data().lastName;
-                                listVolunteers.push({ label: volunteerName, value: doc.id })   
+                            volunteerName = doc.data().firstName + " " + doc.data().lastName;
+                            listVolunteers.push({ label: volunteerName, value: doc.id })
                         }
                     }
                 }
             });
             thisRef.setState(
                 {
-                    speakerData: listSpeakers,
                     volunteerData: listVolunteers,
-                    speakerArray : speakerData
                 });
         })
+
+        ///////
+        DBUtil.addChangeListener("Speakers", function (response) {
+            response.forEach(function (doc) {
+                speakerName = doc.data().fullName;
+                listSpeakers.push({ label: speakerName, value: doc.id });
+                speakerData.push({ id: doc.id, speakerData: doc.data() });
+            });
+            thisRef.setState(
+                {
+                    speakerData: listSpeakers,
+                    speakerArray: speakerData
+                });
+        })
+
+        //////////
+
+
+
+
         DBUtil.addChangeListener("Rooms", function (response) {
             response.forEach(function (Roomdoc) {
                 mainRoom.push(Roomdoc.id)
@@ -230,19 +243,17 @@ class SessionForm extends Component {
         event.preventDefault();
         this.setState({ submitted: true });
         const EventObj = this.state.EventObj;
-       // console.log('event oBJ', EventObj);
-       
-      
+
         this.handleValidations();
-         let speakerArrayforData= [];
+        let speakerArrayforData = [];
         EventObj.speakers.forEach(speakerId => {
             this.state.speakerArray.forEach(speakerData => {
-                if(speakerId === speakerData.id){
+                if (speakerId === speakerData.id) {
                     speakerArrayforData.push(speakerData)
                 }
             })
         })
-       EventObj.speakers = speakerArrayforData;
+        EventObj.speakers = speakerArrayforData;
         if (EventObj.eventName && EventObj.startTime && EventObj.endTime) {
             let compRef = this;
             let tableName = Sessions;
@@ -262,7 +273,7 @@ class SessionForm extends Component {
             }
             //  isRegrequired: EventObj.isRegrequired
             // let isRegrequired = this.state.EventObj.isRegrequired;
-            
+
             DBUtil.addObj(tableName, doc, function (response) {
                 toast.success("Session added successfully.", {
                     position: toast.POSITION.BOTTOM_RIGHT,
@@ -338,16 +349,16 @@ class SessionForm extends Component {
         this.setState({ submitted: true });
         const EventObj = this.state.EventObj;
         this.handleValidations();
-      
-        let speakerArrayforData= [];
+
+        let speakerArrayforData = [];
         EventObj.speakers.forEach(speakerId => {
             this.state.speakerArray.forEach(speakerData => {
-                if(speakerId === speakerData.id){
+                if (speakerId === speakerData.id) {
                     speakerArrayforData.push(speakerData)
                 }
             })
         })
-       EventObj.speakers = speakerArrayforData;
+        EventObj.speakers = speakerArrayforData;
 
         if (EventObj.eventName && EventObj.startTime && EventObj.endTime) {
             let compRef = this;
@@ -561,10 +572,10 @@ class SessionForm extends Component {
     //method for editing session onclick
     formAction(event) {
         let editobj = {};
-       // console.log(event, "event")
-       let speakersId = [];
-       event.speakers.forEach(speaker => {
-            console.log("speaker",speaker);
+    
+        let speakersId = [];
+        event.speakers.forEach(speaker => {
+        
             speakersId.push(speaker.id)
         })
 
@@ -575,7 +586,7 @@ class SessionForm extends Component {
         EventObj.endTime = event.end;
         EventObj.description = event.description;
         EventObj.sessionCapacity = event.sessionCapacity,
-        EventObj.extraServices = event.extraServices;
+            EventObj.extraServices = event.extraServices;
         EventObj.speakers = speakersId;
         EventObj.volunteers = event.volunteers;
         EventObj.room = event.room;
