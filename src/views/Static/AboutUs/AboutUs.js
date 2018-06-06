@@ -3,7 +3,7 @@ import {
     Input, InputGroup, InputGroupText, InputGroupAddon, Row, Col,
     Card, CardBody, Button, Label, FormGroup
 } from 'reactstrap';
-
+import Select from 'react-select';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import { DBUtil } from '../../../services';
@@ -15,25 +15,29 @@ class AboutUs extends Component{
         this.state = {
             info: '',
             information : '',
-            url :''
+            url :'',
+            events : [],
+            eventData : [],
+            selectedEvent : ''
         };
         this.changeFunction = this.changeFunction.bind(this);
         this.urlChangeFunction = this.urlChangeFunction.bind(this);
         this.submitFunction = this.submitFunction.bind(this);
         this.resetField = this.resetField.bind(this);
+        this.onEventSelect = this.onEventSelect.bind(this);
     }
     componentWillMount () {
-        DBUtil.getDocRef("AboutUs").doc("AboutUs").onSnapshot((snapshot) =>{
-            let information= "";
-            let url= "";
-            information = snapshot.data().info;
-            url = snapshot.data().url ? snapshot.data().url : '';
-                this.setState({
-                    information : information,
-                    url : url
-                })
-            //}
+        let events = [];
+        let eventData = [];
+        eventData  =JSON.parse(localStorage.getItem('eventList'));
+        eventData.forEach(event => {
+            events.push({label : event.eventName , value : event.eventName})
         })
+        this.setState({
+            events: events,
+            eventData: eventData
+        });
+        
     }
     // Method to set text area value
     changeFunction(event) {
@@ -51,16 +55,43 @@ class AboutUs extends Component{
             url: value,
         });
     }
+    onEventSelect(eventName) {
+        let eventName1 = eventName;
+        this.setState({
+            selectedEvent: eventName1
+        });
+        let information = "";
+        let url = "";
+        DBUtil.getDocRef("AboutUs")
+            .where('eventName', '==', eventName1)
+            .get()
+            .then((snapshot) => {
+                snapshot.forEach(doc =>{
+                    information = doc.data().info;
+                    url = doc.data().url ? doc.data().url : '';
+                })
+                this.setState({
+                    information: information,
+                    url: url
+                })
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
     // Method for submit & pass data to database
     submitFunction(event){
         event.preventDefault();        
         const { information } = this.state;
         const { url } = this.state;   
         let componentRef = this;
-        if (information != "") {
+        if (information != "" && this.state.selectedEvent !== "") {
+            let selectedEvent = _.filter(this.state.eventData, {eventName : this.state.selectedEvent});            
             let tableName = "AboutUs";
-            let docName = "AboutUs"
+            let docName = selectedEvent[0].eventName
             let doc = {
+                eventDetails : selectedEvent[0],
+                eventName : selectedEvent[0].eventName,
                 info: information,
                 timestamp: new Date(),
                 url :  url
@@ -80,12 +111,17 @@ class AboutUs extends Component{
               });
             });
         }
+        else{
+            alert('Information/Event cannot be blank');
+        }
     }
 
     // Method for reset all fields
     resetField(resetFlag) {
         this.setState({
-            info: ''
+            information: '',
+            url : '',
+            selectedEvent : ''
         });
         if (resetFlag != true) {
             toast.success("About us form reset successfully.", {
@@ -95,6 +131,9 @@ class AboutUs extends Component{
     }
 
     render(){
+        const { events, selectedEvent } = { ...this.state }
+        let eventOptions = events;
+
         return (
             <div className="animated fadeIn">
                 <Row className="justify-content-left">
@@ -102,6 +141,16 @@ class AboutUs extends Component{
                     <Card className="mx-6">
                     <CardBody className="p-4">
                         <h1>About Us</h1>
+                        <FormGroup row>
+                            <Col xs="12" md="6">
+                                <Select
+                                    placeholder="--Select Event--"
+                                    simpleValue
+                                    value={selectedEvent}
+                                    options={eventOptions}
+                                    onChange={this.onEventSelect} />
+                            </Col>
+                        </FormGroup>
                         <FormGroup row>
                         <Col xs="12" md="12">
                             <InputGroup className="mb-3">

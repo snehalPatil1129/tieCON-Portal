@@ -3,7 +3,7 @@ import {
     Input, InputGroup, InputGroupText, InputGroupAddon, Row, Col,
     Card, CardBody, Button, Label, FormGroup
 } from 'reactstrap';
-
+import Select from 'react-select';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import { DBUtil } from '../../../services';
@@ -20,41 +20,31 @@ class HelpDesk extends Component{
                 eventSupportContact: '',
                 techSupportEmail: '',
                 techSupportContact : ''
-            }
+            },
+            events : [],
+            eventData : [],
+            selectedEvent : ''
         };
         this.changeFunction = this.changeFunction.bind(this);
-        //this.urlChangeFunction = this.urlChangeFunction.bind(this);
+        this.onEventSelect = this.onEventSelect.bind(this);
         this.submitFunction = this.submitFunction.bind(this);
         this.resetField = this.resetField.bind(this);
         this.setInputToNumeric = this.setInputToNumeric.bind(this);
     }
     componentWillMount () {
-        Geocode.fromAddress("Shakti Colony, Pimple Nilakh, Pimpri-Chinchwad, Maharashtra 411027")
-            .then((response) => {
-                const { lat, lng } = response.results[0].geometry.location;
-                console.log(lat, lng);
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-        
-
-
-        // DBUtil.getDocRef("HelpDesk").doc("HelpDesk").onSnapshot((snapshot) =>{
-        //     let information= "";
-        //     let url= "";
-        //     information = snapshot.data().info;
-        //     url = snapshot.data().url ? snapshot.data().url : '';
-        //         this.setState({
-        //             information : information,
-        //             url : url
-        //         })
-        //     //}
-        // })
+        let events = [];
+        let eventData = [];
+        eventData  =JSON.parse(localStorage.getItem('eventList'));
+        eventData.forEach(event => {
+            events.push({label : event.eventName , value : event.eventName})
+        })
+        this.setState({
+            events: events,
+            eventData: eventData
+        });
     }
     // Method to set text area value
     changeFunction(event) {
-
         let newState = {...this.state.helpDeskDetails};
         newState[event.target.name] = event.target.value;
         this.setState({
@@ -68,11 +58,13 @@ class HelpDesk extends Component{
         event.preventDefault();        
         let componentRef = this;
         const helpDeskDetails = {...this.state.helpDeskDetails}
-
-       // if (information != "") {
+        if(this.state.selectedEvent !== ""){
+            let selectedEvent = _.filter(this.state.eventData, {eventName : this.state.selectedEvent});
             let tableName = "HelpDesk";
-            let docName = "HelpDesk"
+            let docName = selectedEvent[0].eventName;
             let doc = {
+                eventName : selectedEvent[0].eventName,
+                eventDetails : selectedEvent[0],
                 helpDeskDetails : helpDeskDetails,
                 timestamp: new Date()
             }
@@ -90,7 +82,10 @@ class HelpDesk extends Component{
                 position: toast.POSITION.BOTTOM_RIGHT,
               });
             });
-       // }
+        }
+        else{
+            alert("Please select event");
+        }
     }
     setInputToNumeric(e) {
         const re = /[0-9]+/g;
@@ -109,8 +104,42 @@ class HelpDesk extends Component{
             });
         }
     }
-
+    onEventSelect(eventName) {
+        let eventName1 = eventName;
+        this.setState({
+            selectedEvent: eventName1
+        });
+        let helpDeskDetails = [];
+        DBUtil.getDocRef("HelpDesk")
+        .where('eventName', '==', eventName1)
+        .get()
+        .then((snapshot) => {
+            if(snapshot.size > 0){
+                snapshot.forEach(doc =>{
+                    helpDeskDetails = doc.data().helpDeskDetails
+                })
+                this.setState({
+                    helpDeskDetails : helpDeskDetails
+                })
+            }
+            else{
+                this.setState({
+                    helpDeskDetails :  {
+                        eventSupportEmail:'',
+                        eventSupportContact: '',
+                        techSupportEmail: '',
+                        techSupportContact : ''
+                    }
+                })
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+    }
     render(){
+        const { events, selectedEvent } = { ...this.state }
+        let eventOptions = events;
         return (
             <div className="animated fadeIn">
                 <Row className="justify-content-left">
@@ -118,6 +147,16 @@ class HelpDesk extends Component{
                     <Card className="mx-6">
                     <CardBody className="p-4">
                         <h1>Help Desk</h1>
+                        <FormGroup row>
+                            <Col xs="12" md="6">
+                                <Select
+                                    placeholder="--Select Event--"
+                                    simpleValue
+                                    value={selectedEvent}
+                                    options={eventOptions}
+                                    onChange={this.onEventSelect} />
+                            </Col>
+                        </FormGroup>
                         <h5>Event Support</h5>
                         <FormGroup row>
                        

@@ -80,6 +80,9 @@ class AboutEternus extends Component{
               });
             });
         }
+        else{
+            alert("Information field cannot be blank");
+        }
     }
 
     // Method for reset all fields

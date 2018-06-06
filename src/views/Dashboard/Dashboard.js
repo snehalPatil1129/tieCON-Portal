@@ -26,6 +26,16 @@ class Dashboard extends Component {
        let sessionObject = JSON.stringify(sessions);
        localStorage.setItem('sessionList', sessionObject);
     })
+
+    DBUtil.addChangeListener("Events", function (objectList) {
+      let events = [];
+      objectList.forEach(function(doc){
+        events.push(doc.data())
+     })
+      let eventObject = JSON.stringify(events);
+      localStorage.setItem('eventList', eventObject);
+   })
+
   }
 
   render() {
