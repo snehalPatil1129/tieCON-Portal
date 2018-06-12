@@ -31,6 +31,7 @@ import Logout from '../../views/Pages/logOut/';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 import InitialQuestions from '../../views/InitialQuestions/InitialQuestions';
+import DynamicQuestions from '../../views/Questions/DynamicQuestions';
 import SessionRegistration from '../../views/SessionRegistration/SessionRegistration';
 
 
@@ -76,56 +77,6 @@ class Full extends Component {
     });
   }
   render() {
-    let AdminPanels = null;
-    if (this.state.isAdmin == true) {
-      AdminPanels = (
-        <Switch>
-          <Route path="/dashboard" name="Dashboard" component={Dashboard} />
-          <Route path="/user" name="User" component={User} />
-          <Route path="/role" name="Role" component={Role} />
-          <Route path="/events" name="Events" component={Events} />
-          <Route path='/registration' name='Registration' component={Registration} />
-          <Route path='/attendance' name='Attendance' component={Attendance} />
-          <Route path='/session' name='Session' component={Session} />
-          <Route path='/rooms' name='Rooms' component={Rooms} />
-          <Route path='/registrationList' name='Registration List' component={RegistrationList} />
-          <Route path='/attendee' name='Attendee' component={Attendee} />
-          <Route path='/speakers' name='Speakers' component={Speakers} />
-          <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
-          <Route path='/sessionReport' name='Session Report' component={SessionReport} />
-          <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
-          <Route path='/staticPages/aboutUs' name='AboutUs' component={AboutUs} />
-          <Route path='/staticPages/locationDetails' name='location Details' component={LocationDetails} />
-          <Route path='/staticPages/aboutEternus' name='AboutEternusSoltions' component={AboutEternus} />
-          <Route path='/staticPages/helpDesk' name='HelpDesk' component={HelpDesk} />
-          <Route path='/sponsor' name='Sponsor' component={Sponsor} />
-          <Route path='/logOut' name='logOut' component={Logout} />
-          <Route path='/initialQuestions' name='Initial Questions' component={InitialQuestions} />
-          <Route path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
-
-          <Redirect from="/" to="/dashboard" />
-        </Switch>
-      )
-    }
-    else {
-      AdminPanels = (
-        <Switch>
-          <Route path="/dashboard" name="Dashboard" component={Dashboard} />
-          <Route path="/events" name="Events" component={Events} />
-          <Route path='/attendance' name='Attendance' component={Attendance} />
-          <Route path='/registrationList' name='Registration List' component={RegistrationList} />
-          <Route path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
-          <Route path='/sessionReport' name='Session Report' component={SessionReport} />
-          <Route path='/sessionsReport' name='Session Report' component={SessionsReport} />
-          <Route path='/aboutUs' name='AboutUs' component={AboutUs} />
-          <Route path='/sponsor' name='Sponsor' component={Sponsor} />
-          <Route path='/logOut' name='logOut' component={Logout} />
-          <Route path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
-          <Redirect from="/" to="/dashboard" />
-        </Switch>
-      )
-    }
-
     if (!this.state.initialLoad) {
       if (this.state.authUser == true) {
         return (
@@ -136,7 +87,32 @@ class Full extends Component {
               <main className="main">
                 <Breadcrumb />
                 <Container fluid>
-                  {AdminPanels}
+                  <Switch>
+                    <Route isAdmin={this.state.isAdmin} path="/dashboard" name="Dashboard" component={Dashboard} />
+                    <Route isAdmin={this.state.isAdmin} path="/user" name="User" component={User} />
+                    <Route isAdmin={this.state.isAdmin} path="/role" name="Role" component={Role} />
+                    <Route isAdmin={this.state.isAdmin} path="/events" name="Events" component={Events} />
+                    <Route isAdmin={this.state.isAdmin} path='/registration' name='Registration' component={Registration} />
+                    <Route isAdmin={this.state.isAdmin} path='/attendance' name='Attendance' component={Attendance} />
+                    <Route isAdmin={this.state.isAdmin} path='/session' name='Session' component={Session} />
+                    <Route isAdmin={this.state.isAdmin} path='/rooms' name='Rooms' component={Rooms} />
+                    <Route isAdmin={this.state.isAdmin} path='/registrationList' name='Registration List' component={RegistrationList} />
+                    <Route isAdmin={this.state.isAdmin} path='/attendee' name='Attendee' component={Attendee} />
+                    <Route isAdmin={this.state.isAdmin} path='/speakers' name='Speakers' component={Speakers} />
+                    <Route isAdmin={this.state.isAdmin} path='/attendeeReport' name='Attendee Report' component={AttendeeReport} />
+                    <Route isAdmin={this.state.isAdmin} path='/sessionReport' name='Session Report' component={SessionReport} />
+                    <Route isAdmin={this.state.isAdmin} path='/sessionsReport' name='Session Report' component={SessionsReport} />
+                    <Route isAdmin={this.state.isAdmin} path='/staticPages/aboutUs' name='AboutUs' component={AboutUs} />
+                    <Route isAdmin={this.state.isAdmin} path='/staticPages/locationDetails' name='location Details' component={LocationDetails} />
+                    <Route isAdmin={this.state.isAdmin} path='/staticPages/aboutEternus' name='AboutEternusSoltions' component={AboutEternus} />
+                    <Route isAdmin={this.state.isAdmin} path='/staticPages/helpDesk' name='HelpDesk' component={HelpDesk} />
+                    <Route isAdmin={this.state.isAdmin} path='/sponsor' name='Sponsor' component={Sponsor} />
+                    <Route isAdmin={this.state.isAdmin} path='/logOut' name='logOut' component={Logout} />
+                    <Route isAdmin={this.state.isAdmin} path='/initialQuestions' name='Initial Questions' component={InitialQuestions} />
+                    <Route isAdmin={this.state.isAdmin} path='/dynamicQuestions' name='Dynamic Questions' component={DynamicQuestions} />
+                    <Route isAdmin={this.state.isAdmin} path='/sessionRegistration' name='Session Registration' component={SessionRegistration} />
+                    <Redirect from="/" to="/dashboard" />
+                  </Switch>
                 </Container>
               </main>
               <Aside />

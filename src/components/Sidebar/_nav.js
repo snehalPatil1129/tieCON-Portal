@@ -49,6 +49,12 @@ export default {
       forAll : false
     },
     {
+      name: 'Dynamic Questions',
+      url: '/dynamicQuestions',
+      icon: 'icon-note',
+      forAll : false
+    },
+    {
       name: 'Sponsor',
       url: '/sponsor',
       icon: 'icon-note',

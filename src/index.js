@@ -4,18 +4,25 @@ import { HashRouter, Route, Switch } from 'react-router-dom';
 import 'flag-icon-css/css/flag-icon.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import 'simple-line-icons/css/simple-line-icons.css';
-import '../scss/style.scss'
-import '../scss/core/_dropdown-menu-right.scss'
+import '../scss/style.scss';
+import '../scss/core/_dropdown-menu-right.scss';
+import Full from './containers/Full/';
+import Login from './views/Pages/Login/';
+import Logout from './views/Pages/logOut/';
+import Register from './views/Pages/Register/Register';
+import SessionQuestions from './views/SessionQuestions/SessionQuestions';
+import '../customStyle.css';
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import reducer from './store/reducer';
+import thunk from 'redux-thunk';
 
-import Full from './containers/Full/'
-import Login from './views/Pages/Login/'
-import Logout from './views/Pages/logOut/'
-import Register from './views/Pages/Register/Register'
-import SessionQuestions from './views/SessionQuestions/SessionQuestions'
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-import '../customStyle.css'
-import * as firebase from 'firebase';
-import 'firebase/firestore';
+const store = createStore(reducer, composeEnhancers(
+  applyMiddleware(thunk)
+));
+
 let Routes = (
   <Switch>
       <Route path="/dashboard" name="Home" component={Full} />
@@ -39,6 +46,7 @@ let Routes = (
       <Route path="/user" name="Home" component={Full} />
       <Route path="/role" name="Home" component={Full} />
       <Route path='/initialQuestions' name='Home' component={Full} />
+      <Route path='/dynamicQuestions' name='Home' component={Full} />
       <Route path='/sessionRegistration' name='Home' component={Full} />
       <Route exact path="/sessionQuestions" name="Session Questions" component={SessionQuestions} />
       <Route exact path="/register" name="Register" component={Register} />
@@ -48,7 +56,9 @@ let Routes = (
 );
 
 ReactDOM.render((
-  <HashRouter>
-    {Routes}
-  </HashRouter>
+  <Provider store={store}>
+    <HashRouter>
+      {Routes}
+    </HashRouter>
+  </Provider>
 ), document.getElementById('root'));
